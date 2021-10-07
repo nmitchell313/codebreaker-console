@@ -14,19 +14,19 @@ public class GameRepository {
         proxy = WebServiceProxy.getInstance();
     }
 
-    public Game startGame(String pool, int length) throws IOException {
+    public Game startGame(String pool, int length) throws IOException, BadGameException {
         Game game = new Game();
         game.setPool(pool);
         game.setLength(length);
         Call<Game> call = proxy.startGame(game);
         Response<Game> response = call.execute();
         if (!response.isSuccessful()) {
-            throw new RuntimeException(response.message());
+            throw new BadGameException(response.message());
         }
         return response.body();
     }
 
-    public Guess submitGuess(Game game, String text) throws IOException {
+    public Guess submitGuess(Game game, String text) throws IOException, BadGuessException {
         Guess guess = new Guess();
         guess.setText(text);
         Response<Guess> response = proxy
@@ -38,9 +38,16 @@ public class GameRepository {
         return response.body();
     }
 
-    public class BadGuessException extends IllegalArgumentException {
+    public static class BadGuessException extends IllegalArgumentException {
 
         public BadGuessException(String message) {
+            super(message);
+        }
+    }
+
+    public static class BadGameException extends IllegalArgumentException {
+
+        public BadGameException(String message) {
             super(message);
         }
     }
